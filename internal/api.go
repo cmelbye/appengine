@@ -216,7 +216,11 @@ func fromContext(ctx netcontext.Context) *context {
 }
 
 func toContext(c *context) netcontext.Context {
-	ctx := netcontext.WithValue(netcontext.Background(), &contextKey, c)
+	return withContext(netcontext.Background(), c)
+}
+
+func withContext(ctx netcontext.Context, c *context) netcontext.Context {
+	ctx = netcontext.WithValue(ctx, &contextKey, c)
 	if ns := c.req.Header.Get(curNamespaceHeader); ns != "" {
 		ctx = WithNamespace(ctx, ns)
 	}
@@ -227,7 +231,7 @@ func IncomingHeaders(ctx netcontext.Context) http.Header {
 	return fromContext(ctx).req.Header
 }
 
-func NewContext(req *http.Request) netcontext.Context {
+func WithContext(ctx netcontext.Context, req *http.Request) netcontext.Context {
 	ctxs.Lock()
 	c := ctxs.m[req]
 	ctxs.Unlock()
@@ -238,7 +242,11 @@ func NewContext(req *http.Request) netcontext.Context {
 		// so that stack traces will be more sensible.
 		log.Panic("appengine: NewContext passed an unknown http.Request")
 	}
-	return toContext(c)
+	return withContext(ctx, c)
+}
+
+func NewContext(req *http.Request) netcontext.Context {
+	return WithContext(netcontext.Background(), req)
 }
 
 func BackgroundContext() netcontext.Context {

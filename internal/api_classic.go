@@ -28,7 +28,11 @@ func ClassicContextFromContext(ctx netcontext.Context) appengine.Context {
 }
 
 func toContext(c appengine.Context) netcontext.Context {
-	ctx := netcontext.WithValue(netcontext.Background(), &contextKey, c)
+	return withContext(netcontext.Background(), c)
+}
+
+func withContext(ctx context.Context, c appengine.Context) netcontext.Context {
+	ctx = netcontext.WithValue(ctx, &contextKey, c)
 
 	s := &basepb.StringProto{}
 	c.Call("__go__", "GetNamespace", &basepb.VoidProto{}, s, nil)
@@ -37,6 +41,11 @@ func toContext(c appengine.Context) netcontext.Context {
 	}
 
 	return ctx
+}
+
+func WithContext(ctx context.Context, req *http.Request) {
+	c := appengine.NewContext(req)
+	return withContext(ctx, c)
 }
 
 func NewContext(req *http.Request) netcontext.Context {
