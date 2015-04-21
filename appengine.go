@@ -28,10 +28,6 @@ func NewContext(req *http.Request) context.Context {
 	return internal.NewContext(req)
 }
 
-func WithContext(ctx context.Context, req *http.Request) context.Context {
-	return internal.WithContext(ctx, req)
-}
-
 // TODO(dsymonds): Add a Call function here? Otherwise other packages can't access internal.Call.
 
 // TODO(dsymonds): Add BackgroundContext function?
